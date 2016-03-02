@@ -128,12 +128,20 @@ Availible attributes:
         # first construct or set the dom
         if xml_deposit_receipt:
             try:
-                # convert the string to a byte array so that it doesn't matter whether it has encoding declared or not
-                self.dom = etree.fromstring(bytes(xml_deposit_receipt))
+                # we need to account for the possibility that the incoming document may or may not
+                # specify encoding.
+                if isinstance(xml_deposit_receipt, unicode):
+                    # if we have a unicode object, we need to encode it to a string so that the parser doesn't balk
+                    # when it encounters the XML encoding string.  As far as I can tell, it doesn't matter how
+                    # we encode it - the parser should then pick up the encoding of the XML itself.
+                    self.dom = etree.fromstring(xml_deposit_receipt.encode("utf-8"))
+                else:
+                    self.dom = etree.fromstring(bytes(xml_deposit_receipt))
                 self.parsed = True    
             except Exception, e:
                 d_l.error("Was not able to parse the deposit receipt as XML.")
                 return
+            
         elif dom != None:
             self.dom = dom
             self.parsed = True
