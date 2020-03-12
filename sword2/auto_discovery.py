@@ -1,15 +1,23 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
 from .sword2_logging import logging
+
 ad_l = logging.getLogger(__name__)
 
-# FIXME: sgmllib is deprecated, and removed from Python 3.  If moving to
-# Python 3 will need to look at http.parser instead or etree.HTMLParser
-import sgmllib, http_layer
+# sgmllib is deprecated, and removed from Python 3 we use HTMLParser instead
+from html.parser import HTMLParser as baseparser
+from . import http_layer
 
-class AutoDiscovery(sgmllib.SGMLParser):
 
+class AutoDiscovery(baseparser):
     def __init__(self, url=None, http_impl=None):
-        sgmllib.SGMLParser.__init__(self)
-        
+        baseparser.__init__(self)
+
         self.url = url
         self.service_document = None
         self.collection = None
@@ -17,14 +25,14 @@ class AutoDiscovery(sgmllib.SGMLParser):
         self.statement = []
         self.data = None
         self.response = None
-        
+
         if http_impl is None:
             ad_l.info("Loading default HTTP layer")
             self.http = http_layer.HttpLib2Layer(".cache", timeout=30.0)
         else:
             ad_l.info("Using provided HTTP layer")
             self.http = http_impl
-        
+
         if url is not None:
             self.discover(url)
 
@@ -56,9 +64,9 @@ class AutoDiscovery(sgmllib.SGMLParser):
             # we're looking up the rel value first
             if name != "rel":
                 continue
-                
+
             if (value == "http://purl.org/net/sword/discovery/service-document" or
-                value == "sword"):
+                    value == "sword"):
                 # we have found the service document link
                 self.service_document = self._expand_href(self._extract_attribute("href", attributes))
             elif value == "http://purl.org/net/sword/terms/deposit":
@@ -72,4 +80,3 @@ class AutoDiscovery(sgmllib.SGMLParser):
                 state_url = self._expand_href(self._extract_attribute("href", attributes))
                 state_type = self._extract_attribute("type", attributes)
                 self.statement.append((state_url, state_type))
-
