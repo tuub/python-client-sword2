@@ -263,7 +263,7 @@ class Entry(object):
 
     def __str__(self):
         """Export the XML to a bytestring, ready for use"""
-        xml_str = etree.tostring(self.entry)
+        xml_str = etree.tostring(self.entry, encoding = 'unicode')
         if not xml_str.startswith('<?xml version="1.0"?>'):
             xml_str = '<?xml version="1.0"?>' + xml_str
         return xml_str
