@@ -76,7 +76,7 @@ class Category(object):
 
     def __str__(self):
         """Rudimentary way to display the data held, in a way amenable to stdout."""
-        return "Category scheme:%s term:%s label:%s text:'%s'" % (self.scheme, 
+        return "Category scheme:{} term:{} label:{} text:{}".format(self.scheme,
                                                                   self.term,
                                                                   self.label,
                                                                   self.text)
@@ -154,8 +154,8 @@ class Entry(object):
     bootstrap = """<?xml version="1.0"?>
 <entry xmlns="http://www.w3.org/2005/Atom"
         xmlns:dcterms="http://purl.org/dc/terms/">
-    <generator uri="http://bitbucket.org/beno/python-sword2" version="%s"/>
-</entry>""" % __version__
+    <generator uri="http://bitbucket.org/beno/python-sword2" version="{}"/>
+</entry>""".format(__version__)
     def __init__(self, atomEntryXml=None, **kw):
         """Create a basic `Entry` document, setting the generator and a timestamp for the updated element value.
         
@@ -181,7 +181,7 @@ class Entry(object):
             pass
         self.add_ns.append(prefix)
         if prefix not in list(NS.keys()):
-            NS[prefix] = "{%s}%%s" % uri
+            NS[prefix] = "{{{{{0}}}}}{{}}".format(uri)
             
         # we also have to handle namespaces internally, for etree implementations which
         # don't support register_namespace
@@ -206,9 +206,9 @@ class Entry(object):
         Note that this means of entry is not supported for other elements."""
         if k in self.atom_fields:
             # These should be unique!
-            old_e = self.entry.find(NS['atom'] % k)
+            old_e = self.entry.find(NS['atom'].format(k))
             if old_e == None:
-                e = etree.SubElement(self.entry, NS['atom'] % k, nsmap=self.nsmap) # Notice we explicitly declare the nsmap
+                e = etree.SubElement(self.entry, NS['atom'].format(k), nsmap=self.nsmap) # Notice we explicitly declare the nsmap
                 e.text = v
             else:
                 old_e.text = v
@@ -216,7 +216,7 @@ class Entry(object):
             # possible XML namespace, eg 'dcterms_title'
             nmsp, tag = k.split("_", 1)
             if nmsp in self.add_ns:
-                e = etree.SubElement(self.entry, NS[nmsp] % tag, nsmap=self.nsmap) # Notice we explicitly declare the nsmap
+                e = etree.SubElement(self.entry, NS[nmsp].format(tag), nsmap=self.nsmap) # Notice we explicitly declare the nsmap
                 e.text = v
                 if attrs is not None:
                     for an, av in attrs.items():
@@ -238,27 +238,27 @@ class Entry(object):
     def add_author(self, name, uri=None, email=None):
         """Convenience function to add in the atom:author elements in the fashion
         required for Atom"""
-        a = etree.SubElement(self.entry, NS['atom'] % 'author', nsmap=self.nsmap)
-        n = etree.SubElement(a, NS['atom'] % 'name', nsmap=self.nsmap)
+        a = etree.SubElement(self.entry, NS['atom'].format('author'), nsmap=self.nsmap)
+        n = etree.SubElement(a, NS['atom'].format('name'), nsmap=self.nsmap)
         n.text = name
         if uri:
-            u = etree.SubElement(a, NS['atom'] % 'uri', nsmap=self.nsmap)
+            u = etree.SubElement(a, NS['atom'].format('uri'), nsmap=self.nsmap)
             u.text = uri
         if email:
-            e = etree.SubElement(a, NS['atom'] % 'email', nsmap=self.nsmap)
+            e = etree.SubElement(a, NS['atom'].format('email'), nsmap=self.nsmap)
             e.text = email
 
     def add_contributor(self, name, uri=None, email=None):
         """Convenience function to add in the atom:contributor elements in the fashion
         required for Atom"""
-        a = etree.SubElement(self.entry, NS['atom'] % 'contributor', nsmap=self.nsmap)
-        n = etree.SubElement(a, NS['atom'] % 'name', nsmap=self.nsmap)
+        a = etree.SubElement(self.entry, NS['atom'].format('contributor'), nsmap=self.nsmap)
+        n = etree.SubElement(a, NS['atom'].format('name'), nsmap=self.nsmap)
         n.text = name
         if uri:
-            u = etree.SubElement(a, NS['atom'] % 'uri', nsmap=self.nsmap)
+            u = etree.SubElement(a, NS['atom'].format('uri'), nsmap=self.nsmap)
             u.text = uri
         if email:
-            e = etree.SubElement(a, NS['atom'] % 'email', nsmap=self.nsmap)
+            e = etree.SubElement(a, NS['atom'].format('email'), nsmap=self.nsmap)
             e.text = email
 
     def __str__(self):

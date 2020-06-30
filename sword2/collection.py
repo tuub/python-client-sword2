@@ -169,55 +169,55 @@ class SDCollection(object):
         """
         self._reset()
         self.dom = collection
-        self.title = get_text(collection, NS['atom'] % 'title')
+        self.title = get_text(collection, NS['atom'].format('title'))
         # MUST have href attribute
         self.href = collection.attrib.get('href', None)
         # Accept and Accept multipart
-        for accept in collection.findall(NS['app'] % 'accept'):
+        for accept in collection.findall(NS['app'].format('accept')):
             if accept.attrib.get("alternate", None) == "multipart-related":
                 self.accept_multipart.append(accept.text)
             else:
                 self.accept.append(accept.text)
         # Categories
-        for category_element in collection.findall(NS['atom'] % 'category'):
+        for category_element in collection.findall(NS['atom'].format('category')):
             self.categories.append(Category(dom=category_element))
         # SWORD extensions:
-        self.collectionPolicy = get_text(collection, NS['sword'] % 'collectionPolicy')
+        self.collectionPolicy = get_text(collection, NS['sword'].format('collectionPolicy'))
 
         # Mediation: True/False
-        mediation = get_text(collection, NS['sword'] % 'mediation')
+        mediation = get_text(collection, NS['sword'].format('mediation'))
         self.mediation = mediation.lower() == "true"
 
-        self.treatment = get_text(collection, NS['sword'] % 'treatment')
-        self.description = get_text(collection, NS['dcterms'] % 'abstract')
-        self.service = get_text(collection, NS['sword'] % 'service', plural = True)
-        self.acceptPackaging = get_text(collection, NS['sword'] % 'acceptPackaging', plural = True)
+        self.treatment = get_text(collection, NS['sword'].format('treatment'))
+        self.description = get_text(collection, NS['dcterms'].format('abstract'))
+        self.service = get_text(collection, NS['sword'].format('service'), plural = True)
+        self.acceptPackaging = get_text(collection, NS['sword'].format('acceptPackaging'), plural = True)
 
         # Log collection details:
         coll_l.debug(str(self))
 
     def __str__(self):
         """Provides a simple display of the pertinent information in this object suitable for CLI logging."""
-        _s = ["Collection: '%s' @ '%s'. Accept:%s" % (self.title, self.href, self.accept)]
+        _s = ["Collection: {} @ {}. Accept:{}".format(self.title, self.href, self.accept)]
         if self.description:
-            _s.append("SWORD: Description - '%s'" % self.description)
+            _s.append("SWORD: Description - {}".format(self.description))
         if self.collectionPolicy:
-            _s.append("SWORD: Collection Policy - '%s'" % self.collectionPolicy)
+            _s.append("SWORD: Collection Policy - {}".format(self.collectionPolicy))
         if self.mediation:
-            _s.append("SWORD: Mediation? - '%s'" % self.mediation)
+            _s.append("SWORD: Mediation? - {}".format(self.mediation))
         if self.treatment:
-            _s.append("SWORD: Treatment - '%s'" % self.treatment)
+            _s.append("SWORD: Treatment - {}".format(self.treatment))
         if self.acceptPackaging:
-            _s.append("SWORD: Accept Packaging: '%s'" % self.acceptPackaging)
+            _s.append("SWORD: Accept Packaging: {}".format(self.acceptPackaging))
         if self.service:
-            _s.append("SWORD: Nested Service Documents - '%s'" % self.service)
+            _s.append("SWORD: Nested Service Documents - {}".format(self.service))
         for c in self.categories:
             _s.append(str(c))
         return "\n".join(_s)
 
     def __repr__(self):
         """Provides the atom.title of the collection as part of the repr reply"""
-        return "<sword2.SDCollection - title: %s>" % self.title
+        return "<sword2.SDCollection - title: {}>".format(self.title)
 
     def to_json(self):
         """Provides a simple means to turn the important parsed information into a simple JSON-encoded form.
@@ -239,7 +239,7 @@ class SDCollection(object):
                   'categories':self.categories}
             return json.dumps(_j)
         else:
-            coll_l.error("Could not return information about Collection '%s' as JSON" % self.title)
+            coll_l.error("Could not return information about Collection {} as JSON".format(self.title))
             return
 
 class Collection_Feed(object):

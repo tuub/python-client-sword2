@@ -21,12 +21,12 @@ except ImportError:
 import mimetypes
 
 NS = {}
-NS['dcterms'] = "{http://purl.org/dc/terms/}%s"
-NS['sword'] ="{http://purl.org/net/sword/terms/}%s"
-NS['atom'] = "{http://www.w3.org/2005/Atom}%s"
-NS['app'] = "{http://www.w3.org/2007/app}%s"
-NS['rdf'] = "{http://www.w3.org/1999/02/22-rdf-syntax-ns#}%s"
-NS['ore'] = "{http://www.openarchives.org/ore/terms/}%s"
+NS['dcterms'] = "{{http://purl.org/dc/terms/}}{}"
+NS['sword'] ="{{http://purl.org/net/sword/terms/}}{}"
+NS['atom'] = "{{http://www.w3.org/2005/Atom}}{}"
+NS['app'] = "{{http://www.w3.org/2007/app}}{}"
+NS['rdf'] = "{{http://www.w3.org/1999/02/22-rdf-syntax-ns#}}{}"
+NS['ore'] = "{{http://www.openarchives.org/ore/terms/}}{}"
 
 def get_text(parent, tag, plural = False):
     """Takes an `etree.Element` and a tag name to search for and retrieves the text attribute from any
@@ -189,7 +189,7 @@ def create_multipart_related(payloads):
     # Generate random boundary code
     # TODO check that it does not occur in the payload data
     bhash = md5(datetime.now().isoformat()).hexdigest()    # eg 'd8bb3ea6f4e0a4b4682be0cfb4e0a24e'
-    BOUNDARY = '===========%s_$' % bhash
+    BOUNDARY = '==========={}_$'.format(bhash)
     CRLF = '\r\n'   # As some servers might barf without this.
     body = []
     for payload in payloads:   # predicatable ordering...
@@ -197,7 +197,7 @@ def create_multipart_related(payloads):
         if payload.get('type', None):
             body.append('Content-Type: %(type)s' % payload)
         else:
-            body.append('Content-Type: %s' % get_content_type(payload.get("filename")))
+            body.append('Content-Type: {}'.format(get_content_type(payload.get("filename"))))
             
         if payload.get('filename', None):
             body.append('Content-Disposition: attachment; name="%(key)s"; filename="%(filename)s"' % (payload))
@@ -206,7 +206,7 @@ def create_multipart_related(payloads):
         
         if "headers" in payload:
             for f,v in payload['headers'].items():
-                body.append("%s: %s" % (f, v))     # TODO force ASCII?
+                body.append("{}: {}".format(f, v))     # TODO force ASCII?
         
         body.append('MIME-Version: 1.0')
         if payload['key'] == 'payload':
@@ -225,5 +225,5 @@ def create_multipart_related(payloads):
     body.append('--' + BOUNDARY + '--')
     body.append('')
     body_bytes = CRLF.join(body)
-    content_type = 'multipart/related; boundary="%s"' % BOUNDARY
+    content_type = 'multipart/related; boundary="{}"'.format(BOUNDARY)
     return content_type, body_bytes

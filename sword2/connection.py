@@ -250,7 +250,7 @@ Loading in a locally held Service Document:
         if self.sd_iri and download_service_document:
             self._t.start("get_service_document")
             self.get_service_document()
-            conn_l.debug("Getting service document and dealing with the response: %s s" % self._t.time_since_start("get_service_document")[1])
+            conn_l.debug("Getting service document and dealing with the response: {} s".format(self._t.time_since_start("get_service_document")[1]))
     
     def _return_error_or_exception(self, cls, resp, content):
         """Internal method for reporting errors, behaving as the `self.raise_except` flag requires.
@@ -261,11 +261,11 @@ Loading in a locally held Service Document:
         else:
             # content type can contain both the mimetype and the charset (e.g. text/xml; charset=utf-8)
             if resp.get('content-type', "").startswith("text/xml") or resp.get('content-type', "").startswith("application/xml"):
-                conn_l.info("Returning an error document, due to HTTP response code %s" % resp.status)
+                conn_l.info("Returning an error document, due to HTTP response code {}".format(resp.status))
                 e = Error_Document(content, code=resp.status, resp = resp)
                 return e
             else:
-                conn_l.info("Returning due to HTTP response code %s" % resp.status)
+                conn_l.info("Returning due to HTTP response code {}".format(resp.status))
                 e = Error_Document(code=resp.status, resp = resp)
                 return e
     
@@ -300,19 +300,19 @@ Loading in a locally held Service Document:
             conn_l.error("You are unauthorised (401) to access this document on the server. Check your username/password credentials and your 'On Behalf Of'")
             return self._return_error_or_exception(NotAuthorised, resp, content)
         elif resp['status'] == 403:
-            conn_l.error("You are Forbidden (401) to POST to '%s'. Check your username/password credentials and your 'On Behalf Of'")
+            conn_l.error("You are Forbidden (401) to POST to {x}. Check your username/password credentials and your 'On Behalf Of'".format(x=str(content)))
             return self._return_error_or_exception(Forbidden, resp, content)
         elif resp['status'] == 406:
-            conn_l.error("Cannot negotiate for desired format/packaging on '%s'.")
+            conn_l.error("Cannot negotiate for desired format/packaging on {x}".format(x=str(content)))
             return self._return_error_or_exception(NotAcceptable, resp, content)
         elif resp['status'] == 408:
             conn_l.error("Request Timeout (408) - error uploading.")
             return self._return_error_or_exception(RequestTimeOut, resp, content)
         elif int(resp['status']) > 499:
-            conn_l.error("Server error occured. Response headers from the server:\n%s" % resp)
+            conn_l.error("Server error occured. Response headers from the server:\n{}".format(resp))
             return self._return_error_or_exception(ServerError, resp, content)
         else:
-            conn_l.error("Unknown error occured. Response headers from the server:\n%s\n%s" % (resp, content))
+            conn_l.error("Unknown error occured. Response headers from the server:\n{}\n{}".format(resp, content))
             return self._return_error_or_exception(HTTPResponseError, resp, content)
     
     def _cache_deposit_receipt(self, d):
@@ -332,7 +332,7 @@ Loading in a locally held Service Document:
         """
         if self.keep_cache:
             timestamp = self._t.get_timestamp()
-            conn_l.debug("Caching document (Edit-IRI:%s) - at %s" % (d.edit, timestamp))
+            conn_l.debug("Caching document (Edit-IRI:{}) - at {}".format(d.edit, timestamp))
             self.edit_iris[d.edit] = d
             if d.cont_iri:   # SHOULD exist within receipt
                 self.cont_iris[d.cont_iri] = d
@@ -396,7 +396,7 @@ Loading in a locally held Service Document:
                              response = resp, 
                              process_duration = took_time)
         if resp['status'] == 200:
-            conn_l.info("Received a document for %s" % self.sd_iri)
+            conn_l.info("Received a document for {}".format(self.sd_iri))
             self.load_service_document(content)
         elif resp['status'] == 401:
             conn_l.error("You are unauthorised (401) to access this document on the server. Check your username/password credentials")
@@ -592,7 +592,7 @@ Loading in a locally held Service Document:
             headers['Content-Type'] = str(mimetype)
             headers['Content-MD5'] = str(md5sum)
             headers['Content-Length'] = str(f_size)
-            headers['Content-Disposition'] = "attachment; filename=%s" % urllib.parse.quote(filename)
+            headers['Content-Disposition'] = "attachment; filename={}".format(urllib.parse.quote(filename))
             if packaging is not None:
                 headers['Packaging'] = str(packaging)
             
@@ -619,7 +619,7 @@ Loading in a locally held Service Document:
                 # Fighting chance that this is a deposit receipt
                 d = Deposit_Receipt(xml_deposit_receipt = content)
                 if d.parsed:
-                    conn_l.info("Server response included a Deposit Receipt. Caching a copy in .resources['%s']" % d.edit)
+                    conn_l.info("Server response included a Deposit Receipt. Caching a copy in .resources[{}]".format(d.edit))
                 d.response_headers = dict(resp)
                 d.location = location
                 d.code = 201
@@ -648,7 +648,7 @@ Loading in a locally held Service Document:
             if self._normalise_mime(content_type).startswith("application/atom+xml;type=entry") and len(content) > 0: 
                 d = Deposit_Receipt(content)
                 if d.parsed:
-                    conn_l.info("Server response included a Deposit Receipt. Caching a copy in .resources['%s']" % d.edit)
+                    conn_l.info("Server response included a Deposit Receipt. Caching a copy in .resources[{}]".format(d.edit))
                     d.response_headers = dict(resp)
                     d.location = location
                     d.code = 200
@@ -821,7 +821,7 @@ The SWORD server is not required to support packaging formats, but this profile 
                 if w == workspace:
                     for c in collections:
                         if c.title == collection:
-                            conn_l.debug("Matched: Workspace='%s', Collection='%s' ==> Col-IRI='%s'" % (workspace, 
+                            conn_l.debug("Matched: Workspace={}, Collection={} ==> Col-IRI={}".format(workspace,
                                                                                                         collection, 
                                                                                                         c.href))
                             col_iri = c.href
@@ -936,10 +936,10 @@ response_headers, etc)
             else:
                 request_type = "Update Metadata PUT"
             if dr != None and dr.edit != None:
-                conn_l.info("Using the deposit receipt to get the Edit-IRI: %s" % dr.edit)
+                conn_l.info("Using the deposit receipt to get the Edit-IRI: {}".format(dr.edit))
                 target_iri = dr.edit
             elif edit_iri != None:
-                conn_l.info("Using the %s receipt as the Edit-IRI" % edit_iri)
+                conn_l.info("Using the {} receipt as the Edit-IRI".format(edit_iri))
                 target_iri = edit_iri
             else:
                 conn_l.error("Metadata or Metadata + file multipart-related update: Cannot find the Edit-IRI from the parameters supplied.")
@@ -948,10 +948,10 @@ response_headers, etc)
             conn_l.info("Using the Edit-Media-IRI - File update uses a PUT request to the Edit-Media-IRI")
             request_type = "Update File PUT"
             if dr != None and dr.edit_media != None:
-                conn_l.info("Using the deposit receipt to get the Edit-Media-IRI: %s" % dr.edit_media)
+                conn_l.info("Using the deposit receipt to get the Edit-Media-IRI: {}".format(dr.edit_media))
                 target_iri = dr.edit_media
             elif edit_media_iri != None:
-                conn_l.info("Using the %s receipt as the Edit-Media-IRI" % edit_media_iri)
+                conn_l.info("Using the {} receipt as the Edit-Media-IRI".format(edit_media_iri))
                 target_iri = edit_media_iri
             else:
                 conn_l.error("File update: Cannot find the Edit-Media-IRI from the parameters supplied.")
@@ -1024,7 +1024,7 @@ then the response will be a `sword2.Error_Document`, but will still have the afo
 response_headers, etc)
 
         """
-        conn_l.info("Appending file to a deposit via Edit-Media-IRI %s" % edit_media_iri)
+        conn_l.info("Appending file to a deposit via Edit-Media-IRI {}".format(edit_media_iri))
         return self._make_request(target_iri = edit_media_iri,
                                   payload=payload,
                                   mimetype=mimetype,
@@ -1169,20 +1169,20 @@ response_headers, etc)
                 conn_l.info("Using the deposit receipt to get the SWORD2-Edit-IRI")
                 se_iri = dr.se_iri
                 if se_iri:
-                    conn_l.info("Update Resource via SWORD2-Edit-IRI %s" % se_iri)
+                    conn_l.info("Update Resource via SWORD2-Edit-IRI {}".format(se_iri))
                 else:
                     # we could try the edit IRI although technically that's not what it's for
                     se_iri = dr.edit
                     if se_iri:
-                        conn_l.info("Complete deposit using the Edit-IRI %s as SWORD2-Edit-IRI not available" % se_iri)
+                        conn_l.info("Complete deposit using the Edit-IRI {} as SWORD2-Edit-IRI not available".format(se_iri))
                     else:
                         raise Exception("No SWORD2-Edit-IRI was given and no suitable IRI was found in the deposit receipt.")
             else:
                 raise Exception("No SWORD2-Edit-IRI was given")
         else:
-            conn_l.info("Update Resource via SWORD2-Edit-IRI %s" % se_iri)
+            conn_l.info("Update Resource via SWORD2-Edit-IRI {}".format(se_iri))
 
-        conn_l.info("Adding new file, metadata or both to a SWORD deposit via SWORD-Edit-IRI %s" % se_iri)
+        conn_l.info("Adding new file, metadata or both to a SWORD deposit via SWORD-Edit-IRI {}".format(se_iri))
         return self._make_request(target_iri = se_iri,
                                   payload=payload,
                                   mimetype=mimetype,
@@ -1207,7 +1207,7 @@ Generic method to send an HTTP DELETE request to a given IRI.
 
 Can be given the optional parameter of `on_behalf_of`.
         """
-        conn_l.info("Deleting resource %s" % resource_iri)
+        conn_l.info("Deleting resource {}".format(resource_iri))
         return self._make_request(target_iri = resource_iri,
                                   on_behalf_of=on_behalf_of,
                                   method="DELETE",
@@ -1245,13 +1245,13 @@ and the correct IRI will automatically be chosen.
                 conn_l.info("Using the deposit receipt to get the Edit-Media-IRI")
                 edit_media_iri = dr.edit_media
                 if edit_media_iri:
-                    conn_l.info("Deleting Resource via Edit-Media-IRI %s" % edit_media_iri)
+                    conn_l.info("Deleting Resource via Edit-Media-IRI {}".format(edit_media_iri))
                 else:
                     raise Exception("No Edit-Media-IRI was given and no suitable IRI was found in the deposit receipt.")   
             else:
                 raise Exception("No Edit-Media-IRI was given")
         else:
-            conn_l.info("Deleting Resource via Edit-Media-IRI %s" % edit_media_iri)
+            conn_l.info("Deleting Resource via Edit-Media-IRI {}".format(edit_media_iri))
 
         return self.delete(edit_media_iri,
                                     on_behalf_of = on_behalf_of)
@@ -1292,13 +1292,13 @@ and the correct IRI will automatically be chosen.
                 conn_l.info("Using the deposit receipt to get the Edit-IRI")
                 edit_iri = dr.edit
                 if edit_iri:
-                    conn_l.info("Deleting Container via Edit-IRI %s" % edit_iri)
+                    conn_l.info("Deleting Container via Edit-IRI {}".format(edit_iri))
                 else:
                     raise Exception("No Edit-IRI was given and no suitable IRI was found in the deposit receipt.")   
             else:
                 raise Exception("No Edit-IRI was given")
         else:
-            conn_l.info("Deleting Container via Edit-IRI %s" % edit_iri)
+            conn_l.info("Deleting Container via Edit-IRI {}".format(edit_iri))
 
         return self.delete(edit_iri,
                                     on_behalf_of = on_behalf_of)
@@ -1336,18 +1336,18 @@ and the correct IRI will automatically be chosen.
                 conn_l.info("Using the deposit receipt to get the SWORD2-Edit-IRI")
                 se_iri = dr.se_iri
                 if se_iri:
-                    conn_l.info("Complete deposit using the SWORD2-Edit-IRI %s" % se_iri)
+                    conn_l.info("Complete deposit using the SWORD2-Edit-IRI {}".format(se_iri))
                 else:
                     # we could try the edit-media IRI although technically that's not what it's for
                     se_iri = dr.edit
                     if se_iri:
-                        conn_l.info("Complete deposit using the Edit-IRI %s as SWORD2-Edit-IRI not available" % se_iri)
+                        conn_l.info("Complete deposit using the Edit-IRI {} as SWORD2-Edit-IRI not available".format(se_iri))
                     else:
                         raise Exception("No SWORD2-Edit-IRI was given and no suitable IRI was found in the deposit receipt.")
             else:
                 raise Exception("No SWORD2-Edit-IRI was given")
         else:
-            conn_l.info("Complete deposit using the SWORD2-Edit-IRI %s" % se_iri)
+            conn_l.info("Complete deposit using the SWORD2-Edit-IRI {}".format(se_iri))
         
         return self._make_request(target_iri = se_iri,
                                   on_behalf_of=on_behalf_of,
@@ -1426,13 +1426,13 @@ response_headers, etc)
                 conn_l.info("Using the deposit receipt to get the Edit-Media-IRI")
                 edit_media_iri = dr.edit_media
                 if edit_media_iri:
-                    conn_l.info("Update Resource via Edit-Media-IRI %s" % edit_media_iri)
+                    conn_l.info("Update Resource via Edit-Media-IRI {}".format(edit_media_iri))
                 else:
                     raise Exception("No Edit-Media-IRI was given and no suitable IRI was found in the deposit receipt.")   
             else:
                 raise Exception("No Edit-Media-IRI was given")
         else:
-            conn_l.info("Update Resource via Edit-Media-IRI %s" % edit_media_iri)
+            conn_l.info("Update Resource via Edit-Media-IRI {}".format(edit_media_iri))
             
         return self._make_request(target_iri = edit_media_iri,
                                   payload=payload,
@@ -1514,13 +1514,13 @@ response_headers, etc)
                 conn_l.info("Using the deposit receipt to get the Edit-IRI")
                 edit_iri = dr.edit
                 if edit_iri:
-                    conn_l.info("Update Resource via Edit-IRI %s" % edit_iri)
+                    conn_l.info("Update Resource via Edit-IRI {}".format(edit_iri))
                 else:
                     raise Exception("No Edit-IRI was given and no suitable IRI was found in the deposit receipt.")   
             else:
                 raise Exception("No Edit-IRI was given")
         else:
-            conn_l.info("Update Resource via Edit-IRI %s" % edit_iri)
+            conn_l.info("Update Resource via Edit-IRI {}".format(edit_iri))
 
         return self._make_request(target_iri = edit_iri,
                                   metadata_entry=metadata_entry,
@@ -1610,13 +1610,13 @@ response_headers, etc)
                 conn_l.info("Using the deposit receipt to get the Edit-IRI")
                 edit_iri = dr.edit
                 if edit_iri:
-                    conn_l.info("Update Resource via Edit-IRI %s" % edit_iri)
+                    conn_l.info("Update Resource via Edit-IRI {}".format(edit_iri))
                 else:
                     raise Exception("No Edit-IRI was given and no suitable IRI was found in the deposit receipt.")   
             else:
                 raise Exception("No Edit-IRI was given")
         else:
-            conn_l.info("Update Resource via Edit-IRI %s" % edit_iri)
+            conn_l.info("Update Resource via Edit-IRI {}".format(edit_iri))
 
         return self._make_request(target_iri = edit_iri,
                                   metadata_entry=metadata_entry, 
@@ -1643,13 +1643,13 @@ FIXME: there's also something funny going on with get_resource remembering
 old headers, but not quite sure where that's coming from.  Have to pass in
 packaging and headers explicitly to overcome
         """
-        conn_l.debug("Trying to GET the ATOM Entry Document at %s." % edit_iri)
+        conn_l.debug("Trying to GET the ATOM Entry Document at {}.".format(edit_iri))
         response = self.get_resource(edit_iri, packaging=None, headers={})
         if response.code == 200:
             conn_l.debug("Attempting to parse the response as a Deposit Receipt")
             d = Deposit_Receipt(xml_deposit_receipt = response.content)
             if d.parsed:
-                conn_l.info("Server responsed with a Deposit Receipt. Caching a copy in .resources['%s']" % d.edit)
+                conn_l.info("Server responsed with a Deposit Receipt. Caching a copy in .resources[{}]".format(d.edit))
             d.response_headers = dict(response.response_headers)
             d.code = 200
             self._cache_deposit_receipt(d)
@@ -1664,7 +1664,7 @@ packaging and headers explicitly to overcome
 Getting the Sword Statement.
         """
         # get the statement first
-        conn_l.debug("Trying to GET the ORE Sword Statement at %s." % sword_statement_iri)
+        conn_l.debug("Trying to GET the ORE Sword Statement at {}.".format(sword_statement_iri))
         response = self.get_resource(sword_statement_iri, headers = {'Accept':'application/rdf+xml'})
         if response.code == 200:
             #try:
@@ -1682,7 +1682,7 @@ Getting the Sword Statement.
 Getting the Sword Statement.
         """
         # get the statement first
-        conn_l.debug("Trying to GET the ATOM Sword Statement at %s." % sword_statement_iri)
+        conn_l.debug("Trying to GET the ATOM Sword Statement at {}.".format(sword_statement_iri))
         response = self.get_resource(sword_statement_iri, headers = {'Accept':'application/atom+xml;type=feed'})
         if response.code == 200:
             #try:
@@ -1738,22 +1738,22 @@ Response:
                 conn_l.info("Using the deposit receipt to get the SWORD2-Edit-IRI")
                 content_iri = dr.cont_iri
                 if content_iri:
-                    conn_l.info("Getting the resource at Content-IRI %s" % content_iri)
+                    conn_l.info("Getting the resource at Content-IRI {}".format(content_iri))
                 else:
                     raise Exception("No Content-IRI was given and no suitable IRI was found in the deposit receipt.")   
             else:
                 raise Exception("No Content-IRI was given")
         else:
-            conn_l.info("Getting the resource at Content-IRI %s" % content_iri)
+            conn_l.info("Getting the resource at Content-IRI {}".format(content_iri))
         
         # 406 - PackagingFormatNotAvailable
         if self.honour_receipts and packaging:
             # Make sure that the packaging format is available from the deposit receipt, if loaded
-            conn_l.debug("Checking that the packaging format '%s' is available." % content_iri)
-            conn_l.debug("Cached Cont-IRI Receipts: %s" % list(self.cont_iris.keys()))
+            conn_l.debug("Checking that the packaging format {} is available.".format(content_iri))
+            conn_l.debug("Cached Cont-IRI Receipts: {}".format(list(self.cont_iris.keys())))
             if content_iri in list(self.cont_iris.keys()):
                 if not (packaging in self.cont_iris[content_iri].packaging):
-                    conn_l.error("Desired packaging format '%' not available from the server, according to the deposit receipt. Change the client parameter 'honour_receipts' to False to avoid this check.")
+                    conn_l.error("Desired packaging format '{}' not available from the server, according to the deposit receipt. Change the client parameter 'honour_receipts' to False to avoid this check.".format(packaging))
                     return self._return_error_or_exception(PackagingFormatNotAvailable, {}, "")
         if on_behalf_of:
             headers['On-Behalf-Of'] = on_behalf_of
@@ -1764,9 +1764,9 @@ Response:
         
         self._t.start("IRI GET resource")
         if packaging:
-            conn_l.info("IRI GET resource '%s' with Accept-Packaging:%s" % (content_iri, packaging))
+            conn_l.info("IRI GET resource {} with Accept-Packaging:{}".format(content_iri, packaging))
         else:
-            conn_l.info("IRI GET resource '%s'" % content_iri)
+            conn_l.info("IRI GET resource {}".format(content_iri))
         conn_l.debug("Using headers: " + str(headers))
         resp, content = self.h.request(content_iri, "GET", headers=headers)
         _, took_time = self._t.time_since_start("IRI GET resource")
@@ -1779,10 +1779,10 @@ Response:
                              response = resp,
                              headers = headers,
                              process_duration = took_time)
-        conn_l.info("Server response: %s" % resp['status'])
+        conn_l.info("Server response: {}".format(resp['status']))
         conn_l.debug(dict(resp))
         if resp['status'] == 200:
-            conn_l.debug("Cont_IRI GET resource successful - got %s bytes from %s" % (len(content), content_iri))
+            conn_l.debug("Cont_IRI GET resource successful - got {} bytes from {}".format(len(content), content_iri))
             class ContentWrapper(object):
                 def __init__(self, resp, content):
                     self.response_headers = dict(resp)

@@ -154,7 +154,7 @@ Availible attributes:
             # user know what to expect (note that Error_Document sub classes Deposit_Receipt
             # and that will almost always fail the validation)
             self.valid = self.validate()
-            d_l.info("Initial SWORD2 validation checks on deposit receipt - Valid document? %s" % self.valid)
+            d_l.info("Initial SWORD2 validation checks on deposit receipt - Valid document? {}".format(self.valid))
             
             # finally, handle the metadata
             self.handle_metadata()
@@ -172,7 +172,7 @@ Availible attributes:
         # which MAY be the same as the Edit-IRI
         has_se = False
         
-        links = self.dom.findall(NS['atom'] % "link")
+        links = self.dom.findall(NS['atom'].format("link"))
         for link in links:
             rel = link.get("rel")
             if rel == "edit":
@@ -188,7 +188,7 @@ Availible attributes:
         
         # It MUST contain a single sword:treatment element [SWORD003] which contains either a human-readable 
         # statement describing treatment the deposited resource has received or a IRI that dereferences to such a description.
-        treatment = self.dom.findall(NS['sword'] % "treatment")
+        treatment = self.dom.findall(NS['sword'].format("treatment"))
         if treatment == None or len(treatment) == 0:
             d_l.debug("Validation Fail: no treatment or treatment invalid: " + str(treatment))
             valid = False
@@ -199,10 +199,10 @@ Availible attributes:
         """Method that walks the `etree.SubElement`, assigning the information to the objects attributes."""
         for e in self.dom.getchildren():
             for nmsp, prefix in NS.items():
-                if str(e.tag).startswith(prefix % ""):
+                if str(e.tag).startswith(prefix.format("")):
                     _, tagname = e.tag.rsplit("}", 1)
-                    field = "%s_%s" % (nmsp, tagname)
-                    d_l.debug("Attempting to intepret field: '%s'" % field)
+                    field = "{}_{}".format(nmsp, tagname)
+                    d_l.debug("Attempting to intepret field: {}".format(field))
                     if field == "atom_link":
                         self.handle_link(e)
                     elif field == "atom_content":
@@ -211,7 +211,7 @@ Availible attributes:
                         for ak,av in e.attrib.items():
                             if not e.text:
                                 e.text = ""
-                            e.text += " %s:\"%s\"" % (ak, av)
+                            e.text += " {}:\"{}\"".format(ak, av)
                         self.metadata[field] = [e.text.strip()]
                     elif field == "sword_packaging":
                         self.packaging.append(e.text)
@@ -295,19 +295,19 @@ Availible attributes:
         NB does not report all information, just key parts."""
         _s = []
         for k in sorted(self.metadata.keys()):
-            _s.append("%s: '%s'" % (k, self.metadata[k]))
+            _s.append("{}: {}".format(k, self.metadata[k]))
         if self.edit:
-            _s.append("Edit IRI: %s" % self.edit)
+            _s.append("Edit IRI: {}".format(self.edit))
         if self.edit_media:
-            _s.append("Edit-Media IRI: %s" % self.edit_media)
+            _s.append("Edit-Media IRI: {}".format(self.edit_media))
         if self.se_iri:
-            _s.append("SWORD2 Add IRI: %s" % self.se_iri)
+            _s.append("SWORD2 Add IRI: {}".format(self.se_iri))
         for c in self.categories:
             _s.append(str(c))
         if self.packaging:
-            _s.append("SWORD2 Package formats available: %s" % self.packaging)
+            _s.append("SWORD2 Package formats available: {}".format(self.packaging))
         if self.alternate:
-            _s.append("Alternate IRI: %s" % self.alternate)
+            _s.append("Alternate IRI: {}".format(self.alternate))
         for k, v in self.links.items():
-            _s.append("Link rel:'%s' -- %s" % (k, v))
+            _s.append("Link rel:{} -- {}".format(k, v))
         return "\n".join(_s)

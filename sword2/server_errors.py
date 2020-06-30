@@ -56,22 +56,22 @@ for k,v in SWORD2ERRORSBYNAME.items():
     SWORD2ERRORSBYIRI[v['IRI']] = v
 
 def get_error(iri, code=None):
-    sworderror_l.debug("Attempting to match %s to a known SWORD2 error IRI" % iri)
+    sworderror_l.debug("Attempting to match {} to a known SWORD2 error IRI".format(iri))
     if iri in list(SWORD2ERRORSBYIRI.keys()):
         if code != None:
             if code in SWORD2ERRORSBYIRI[iri]['codes']:
-                sworderror_l.info("Matched '%s' to a known SWORD2 error IRI, and HTTP response code is one of the IRI's' expected response codes." % iri)
+                sworderror_l.info("Matched '{}' to a known SWORD2 error IRI, and HTTP response code is one of the IRI's' expected response codes.".format(iri))
                 return SWORD2ERRORSBYIRI[iri]
             else:
-                sworderror_l.error("Matched '%s' to a known SWORD2 error IRI, but the HTTP response code is NOT one of the IRI's' expected response codes." % iri)
+                sworderror_l.error("Matched '{}' to a known SWORD2 error IRI, but the HTTP response code is NOT one of the IRI's' expected response codes.".format(iri))
                 ue = SWORD2ERRORSBYNAME["UNKNOWNERROR"].copy()
                 ue['IRI'] = iri
                 ue['codes'] = [code]
                 return ue
-        sworderror_l.info("Matched '%s' to a known error IRI." % iri)
+        sworderror_l.info("Matched '{}' to a known error IRI.".format(iri))
         return SWORD2ERRORSBYIRI[iri]
     else:
-        sworderror_l.info("Could not match '%s' to a known SWORD2 error IRI." % iri)
+        sworderror_l.info("Could not match '{}' to a known SWORD2 error IRI.".format(iri))
         ue = SWORD2ERRORSBYNAME["UNKNOWNERROR"].copy()
         ue['IRI'] = iri
         ue['codes'] = [code]

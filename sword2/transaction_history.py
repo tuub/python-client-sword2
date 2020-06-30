@@ -21,16 +21,16 @@ class Transaction_History(list):
         _s = []
         for item in self:
             _s.append("-"*20)
-            _s.append("Type: '%s' [%s]\nData:" % (item['type'], item['timestamp']))
+            _s.append("Type: '{}' [{}]\nData:".format(item['type'], item['timestamp']))
             for key, value in item['payload'].items():
-                _s.append("%s:   %s" % (key, value))
+                _s.append("{}:   {}".format(key, value))
         
         return "\n".join(_s)
 
     def to_json(self):
         from .compatible_libs import json
         if json:
-            th_l.debug("Attempting to dump %s history items to JSON" % len(self))
+            th_l.debug("Attempting to dump {} history items to JSON".format(len(self)))
             return json.dumps(self)
         else:
             th_l.error("Cannot procede with converting the transaction history to JSON")
@@ -38,7 +38,7 @@ class Transaction_History(list):
     def to_pretty_json(self):
         from .compatible_libs import json
         if json:
-            th_l.debug("Attempting to dump %s history items to indented, readable JSON" % len(self))
+            th_l.debug("Attempting to dump {} history items to indented, readable JSON".format(len(self)))
             return json.dumps(self, indent=True)
         else:
             th_l.error("Cannot procede with converting the transaction history to JSON")

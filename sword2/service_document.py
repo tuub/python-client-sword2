@@ -73,19 +73,19 @@ class ServiceDocument(object):
     def load_document(self, xml_response):
         try:
             if self.sd_uri:
-                sd_l.debug("Attempting to load service document for %s" % self.sd_uri)
+                sd_l.debug("Attempting to load service document for {}".format(self.sd_uri))
             else:
                 sd_l.debug("Attempting to load service document")
             self.raw_response = xml_response
             self.service_dom = etree.fromstring(xml_response)
             self.parsed = True
             self.valid = self.validate()
-            sd_l.info("Initial SWORD2 validation checks on service document - Valid document? %s" % self.valid)
+            sd_l.info("Initial SWORD2 validation checks on service document - Valid document? {}".format(self.valid))
             self._enumerate_workspaces()
         except Exception as e:
             # Due to variability of underlying etree implementations, catching all
             # exceptions...
-            sd_l.error("Could not parse the Service Document response from the server - %s" % e)
+            sd_l.error("Could not parse the Service Document response from the server - {}".format(str(e)))
             sd_l.debug("Received the following raw response:")
             sd_l.debug(self.raw_response)
 
@@ -96,19 +96,19 @@ class ServiceDocument(object):
         # The SWORD server MUST specify the sword:version element with a value of 2.0
         # -- MUST have sword:version element
         # -- MUST have value of '2.0'
-        self.version = get_text(self.service_dom, NS['sword'] % "version")
+        self.version = get_text(self.service_dom, NS['sword'].format("version"))
         if self.version:
             if self.version != "2.0":
                 # Not a SWORD2 server...
                 # Fail here?
-                sd_l.error("The service document states that the server's endpoint is not SWORD 2.0 - stated version:%s" % self.version)
+                sd_l.error("The service document states that the server's endpoint is not SWORD 2.0 - stated version:{}".format(self.version))
                 valid = False
         else:
             sd_l.error("The service document did not have a sword:version")
             valid = False
         
         # The SWORD server MAY specify the sword:maxUploadSize (in kB) of content that can be uploaded in one request [SWORD003] as a child of the app:service element. If provided this MUST contain an integer.
-        maxupload = get_text(self.service_dom, NS['sword'] % "maxUploadSize")
+        maxupload = get_text(self.service_dom, NS['sword'].format("maxUploadSize"))
         if maxupload:
             try:
                 self.maxUploadSize = int(maxupload)
@@ -119,7 +119,7 @@ class ServiceDocument(object):
                 valid = False
         
         # Check for the first workspace for a collection element, just to make sure there is something there.
-        test_workspace = self.service_dom.find(NS['app'] % "workspace")
+        test_workspace = self.service_dom.find(NS['app'].format("workspace"))
         if test_workspace != None:
             sd_l.debug("At least one app:workspace found, with at least one app:collection within it.")
         else:
@@ -131,21 +131,21 @@ class ServiceDocument(object):
         # value [AtomPub]. It MUST also specify an app:accept element with an alternate attribute 
         # set to multipart-related as required by [AtomMultipart]. The formats specified by 
         # app:accept and app:accept@alternate="multipart-related" are RECOMMENDED to be the same.
-        workspaces = self.service_dom.findall(NS['app'] % "workspace")
+        workspaces = self.service_dom.findall(NS['app'].format("workspace"))
         if workspaces is not None:
             for workspace in workspaces:
-                cols = workspace.findall(NS['app'] % "collection")
+                cols = workspace.findall(NS['app'].format("collection"))
                 for col in cols:
                     # the collection may contain a sub-service document, which means it is not
                     # beholden to the rules above
-                    service = col.find(NS['sword'] % "service")
+                    service = col.find(NS['sword'].format("service"))
                     if service is not None:
                         continue
                     
                     # since we have no sub-service document, we must validate
                     accept_valid = True
                     multipart_accept_valid = True
-                    accepts = col.findall(NS['app'] % "accept")
+                    accepts = col.findall(NS['app'].format("accept"))
                     for accept in accepts:
                         multipart = accept.get("alternate")
                         if multipart is not None:
@@ -168,15 +168,15 @@ class ServiceDocument(object):
             return
         
         if self.sd_uri:
-            sd_l.info("Enumerating workspaces and collections from the service document for %s" % self.sd_uri)
+            sd_l.info("Enumerating workspaces and collections from the service document for {}".format(self.sd_uri))
         
         # Reset the internally cached set
         self.workspaces = []
-        for workspace in self.service_dom.findall(NS['app'] % "workspace"):
-            workspace_title = get_text(workspace, NS['atom'] % 'title')
-            sd_l.debug("Found workspace '%s'" % workspace_title)
+        for workspace in self.service_dom.findall(NS['app'].format("workspace")):
+            workspace_title = get_text(workspace, NS['atom'].format('title'))
+            sd_l.debug("Found workspace '{}'".format(workspace_title))
             collections = []
-            for collection_element in workspace.findall(NS['app'] % 'collection'):
+            for collection_element in workspace.findall(NS['app'].format('collection')):
                 # app:collection + sword extensions
                 c = SDCollection()
                 c.load_from_etree(collection_element)

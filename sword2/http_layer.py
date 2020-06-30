@@ -85,7 +85,7 @@ class PreemptiveBasicAuthHandler(urllib.request.HTTPBasicAuthHandler):
         self.password = password
 
     def http_request(self, request):
-        request.add_header(self.auth_header, 'Basic %s' % base64.b64encode(self.username + ':' + self.password))
+        request.add_header(self.auth_header, 'Basic {}'.format(base64.b64encode(self.username + ':' + self.password)))
         return request
 
     https_request = http_request

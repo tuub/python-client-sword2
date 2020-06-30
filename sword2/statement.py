@@ -27,8 +27,8 @@ class Sword_Statement(object):
                 self.dom = etree.fromstring(self.xml_document)
                 self.parsed = True
             except Exception as e:
-                s_l.error("Failed to parse document - %s" % e)
-                s_l.error("XML document begins:\n %s" % self.xml_document[:300])
+                s_l.error("Failed to parse document - {}".format(str(e)))
+                s_l.error("XML document begins:\n {}".format(self.xml_document[:300]))
     
     def _validate(self): pass
 
@@ -55,26 +55,26 @@ class Atom_Statement_Entry(Deposit_Receipt, Statement_Resource):
     def _is_original_deposit(self):
         # is this an original deposit?
         is_original_deposit = False
-        for cat in self.dom.findall(NS['atom'] % 'category'):
+        for cat in self.dom.findall(NS['atom'].format('category')):
             if cat.get("term") == "http://purl.org/net/sword/terms/originalDeposit":
                 is_original_deposit = True
                 break
         return is_original_deposit
     
     def _parse_depositors(self):
-        do = self.dom.find(NS['sword'] % "depositedOn")
+        do = self.dom.find(NS['sword'].format("depositedOn"))
         if do is not None and do.text is not None and do.text.strip() != "":
             try:
                 self.deposited_on = datetime.strptime(do.text.strip(), "%Y-%m-%dT%H:%M:%SZ") # e.g. 2011-03-02T20:50:06Z
             except Exception as e:
-                s_l.error("Failed to parse date - %s" % e)
-                s_l.error("Supplied date as string was: %s" % do.text.strip())
+                s_l.error("Failed to parse date - {}".format(str(e)))
+                s_l.error("Supplied date as string was: {}".format(do.text.strip()))
 
-        db = self.dom.find(NS['sword'] % "depositedBy")
+        db = self.dom.find(NS['sword'].format("depositedBy"))
         if db is not None and db.text is not None and db.text.strip() != "":
             self.deposited_by = db.text.strip()
         
-        dobo = self.dom.find(NS['sword'] % "depositedOnBehalfOf")
+        dobo = self.dom.find(NS['sword'].format("depositedOnBehalfOf"))
         if dobo is not None and dobo.text is not None and db.text.strip() != "":
             self.deposited_on_behalf_of = dobo.text.strip()
     
@@ -107,8 +107,8 @@ class Atom_Sword_Statement(Sword_Statement):
             self.feed = etree.fromstring(xml_document)
             self.parsed = True
         except Exception, e:
-            coll_l.error("Failed to parse document - %s" % e)
-            coll_l.error("XML document begins:\n %s" % xml_document[:300])
+            coll_l.error("Failed to parse document - {}".format(str(e)))
+            coll_l.error("XML document begins:\n {}".format(xml_document[:300]))
         self.enumerate_feed()
         """
     
@@ -117,12 +117,12 @@ class Atom_Sword_Statement(Sword_Statement):
             return
         
         # Handle Categories
-        for cat in self.dom.findall(NS['atom'] % 'category'):
+        for cat in self.dom.findall(NS['atom'].format('category')):
             if cat.get("scheme") == "http://purl.org/net/sword/terms/state":
                 self.states.append((cat.get("term"), cat.text.strip()))
         
         # Handle Entries
-        for entry in self.dom.findall(NS['atom'] % 'entry'):
+        for entry in self.dom.findall(NS['atom'].format('entry')):
             ase = Atom_Statement_Entry(entry)
             if ase.is_original_deposit:
                 self.original_deposits.append(ase)
@@ -135,7 +135,7 @@ class Atom_Sword_Statement(Sword_Statement):
             return
         
         # MUST be an ATOM Feed document
-        if self.dom.tag != NS['atom'] % "feed" and self.dom.tag != "feed":
+        if self.dom.tag != NS['atom'].format("feed") and self.dom.tag != "feed":
             valid = False
         
         self.valid = valid
@@ -164,7 +164,7 @@ class Ore_Statement_Resource(Statement_Resource):
         
     def __str__(self):
         # FIXME: unfinished ...
-        return "URI: %s ; is_original_deposit: %s ; packaging_uris: %s ; deposited_on: %s"
+        return "URI: {} ; is_original_deposit: {} ; packaging_uris: {} ; deposited_on: {}".format(self.uri, self.is_original_deposit, self.packaging, self.deposited_on)
 
 class Ore_Sword_Statement(Sword_Statement):
     def __init__(self, xml_document=None):
@@ -184,35 +184,35 @@ class Ore_Sword_Statement(Sword_Statement):
         state_uris = []
         
         # first pass gets me the uris of all the things I care about
-        for desc in self.dom.findall(NS['rdf'] % "Description"):
+        for desc in self.dom.findall(NS['rdf'].format("Description")):
             # look for the aggregation
-            ore_idb = desc.findall(NS['ore'] % "isDescribedBy")
+            ore_idb = desc.findall(NS['ore'].format("isDescribedBy"))
             if ore_idb is None:
                 continue
                 
             # we are looking at the aggregation Describes itself
-            for agg_uri in desc.findall(NS['ore'] % "aggregates"):
-                aggregated_resource_uris.append(agg_uri.get(NS['rdf'] % "resource"))
+            for agg_uri in desc.findall(NS['ore'].format("aggregates")):
+                aggregated_resource_uris.append(agg_uri.get(NS['rdf'].format("resource")))
             
-            for od_uri in desc.findall(NS['sword'] % "originalDeposit"):
-                original_deposit_uris.append(od_uri.get(NS['rdf'] % "resource"))
+            for od_uri in desc.findall(NS['sword'].format("originalDeposit")):
+                original_deposit_uris.append(od_uri.get(NS['rdf'].format("resource")))
         
-            for state_uri in desc.findall(NS['sword'] % "state"):
-                state_uris.append(state_uri.get(NS['rdf'] % "resource"))
+            for state_uri in desc.findall(NS['sword'].format("state")):
+                state_uris.append(state_uri.get(NS['rdf'].format("resource")))
         
         s_l.debug("First pass on ORE statement yielded the following Aggregated Resources: " + str(aggregated_resource_uris))
         s_l.debug("First pass on ORE statement yielded the following Original Deposits: " + str(original_deposit_uris))
         s_l.debug("First pass on ORE statement yielded the following States: " + str(state_uris))
         
         # second pass, sort out the different descriptions
-        for desc in self.dom.findall(NS['rdf'] % "Description"):
-            about = desc.get(NS['rdf'] % "about")
+        for desc in self.dom.findall(NS['rdf'].format("Description")):
+            about = desc.get(NS['rdf'].format("about"))
             s_l.debug("Examining Described Resource: " + str(about))
             if about in state_uris:
                 s_l.debug(str(about) + " is a State URI")
                 # read and store the state information
                 description_text = None
-                sdesc = desc.find(NS['sword'] % "stateDescription")
+                sdesc = desc.find(NS['sword'].format("stateDescription"))
                 if sdesc is not None and sdesc.text is not None and sdesc.text.strip() != "":
                     description_text = sdesc.text.strip()
                 self.states.append((about, description_text))
@@ -226,29 +226,29 @@ class Ore_Sword_Statement(Sword_Statement):
                 s_l.debug("Is Aggregated Resource an original deposit? " + str(is_original_deposit))
                 
                 packaging_uris = []
-                for pack in desc.findall(NS['sword'] % "packaging"):
-                    pack_uri = pack.get(NS['rdf'] % "resource")
+                for pack in desc.findall(NS['sword'].format("packaging")):
+                    pack_uri = pack.get(NS['rdf'].format("resource"))
                     packaging_uris.append(pack_uri)
                     s_l.debug("Registering Packaging URI: " + pack_uri)
                 
                 deposited_on = None
-                do = desc.find(NS['sword'] % "depositedOn")
+                do = desc.find(NS['sword'].format("depositedOn"))
                 if do is not None and do.text is not None and do.text.strip() != "":
                     try:
                         deposited_on = datetime.strptime(do.text.strip(), "%Y-%m-%dT%H:%M:%SZ") # e.g. 2011-03-02T20:50:06Z
                         s_l.debug("Registering Deposited On: " + do.text.strip())
                     except Exception as e:
-                        s_l.error("Failed to parse date - %s" % e)
-                        s_l.error("Supplied date as string was: %s" % do.text.strip())
+                        s_l.error("Failed to parse date - {}".format(str(e)))
+                        s_l.error("Supplied date as string was: {}".format(do.text.strip()))
 
                 deposited_by = None
-                db = desc.find(NS['sword'] % "depositedBy")
+                db = desc.find(NS['sword'].format("depositedBy"))
                 if db is not None and db.text is not None and db.text.strip() != "":
                     deposited_by = db.text.strip()
                     s_l.debug("Registering Deposited By: " + deposited_by)
                 
                 deposited_on_behalf_of = None
-                dobo = desc.find(NS['sword'] % "depositedOnBehalfOf")
+                dobo = desc.find(NS['sword'].format("depositedOnBehalfOf"))
                 if dobo is not None and dobo.text is not None and db.text.strip() != "":
                     deposited_on_behalf_of = dobo.text.strip()
                     s_l.debug("Registering Deposited On Behalf Of: " + deposited_on_behalf_of)
@@ -285,7 +285,7 @@ class Ore_Sword_Statement(Sword_Statement):
         # MUST be an RDF/XML resource map
         
         # is this rdf xml:
-        if self.dom.tag.lower() != NS['rdf'] % "rdf" and self.dom.tag.lower() != "rdf":
+        if self.dom.tag.lower() != NS['rdf'].format("rdf") and self.dom.tag.lower() != "rdf":
             s_l.info("Validation of Ore Statement failed, as root tag is not RDF: " + self.dom.tag)
             valid = False
         
@@ -295,18 +295,18 @@ class Ore_Sword_Statement(Sword_Statement):
         rem_uri = None
         aggregation_uri = None
         is_described_by_uris = []
-        for desc in self.dom.findall(NS['rdf'] % "Description"):
+        for desc in self.dom.findall(NS['rdf'].format("Description")):
             # look for the describes tag
-            ore_desc = desc.find(NS['ore'] % "describes")
+            ore_desc = desc.find(NS['ore'].format("describes"))
             if ore_desc is not None:
-                describes_uri = ore_desc.get(NS['rdf'] % "resource")
-                rem_uri = desc.get(NS['rdf'] % "about")
+                describes_uri = ore_desc.get(NS['rdf'].format("resource"))
+                rem_uri = desc.get(NS['rdf'].format("about"))
             # look for the isDescribedBy tag
-            ore_idb = desc.findall(NS['ore'] % "isDescribedBy")
+            ore_idb = desc.findall(NS['ore'].format("isDescribedBy"))
             if len(ore_idb) > 0:
-                aggregation_uri = desc.get(NS['rdf'] % "about")
+                aggregation_uri = desc.get(NS['rdf'].format("about"))
                 for idb in ore_idb:
-                    is_described_by_uris.append(idb.get(NS['rdf'] % "resource"))
+                    is_described_by_uris.append(idb.get(NS['rdf'].format("resource")))
         
         # now check that all those uris tie up:
         if describes_uri != aggregation_uri:

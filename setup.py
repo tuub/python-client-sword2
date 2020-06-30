@@ -11,7 +11,7 @@ except ImportError:
     pass
 except error.RepoLookupError:
     tip = repo["tip"]
-    version = version + ".%s.%s" % (tip.rev(), tip.hex()[:12])
+    version = version + ".{}.{}".format(tip.rev(), tip.hex()[:12])
 except error.RepoError:
     pass
 
