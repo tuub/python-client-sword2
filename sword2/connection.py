@@ -1754,6 +1754,8 @@ Response:
             if content_iri in list(self.cont_iris.keys()):
                 if not (packaging in self.cont_iris[content_iri].packaging):
                     conn_l.error("Desired packaging format '{}' not available from the server, according to the deposit receipt. Change the client parameter 'honour_receipts' to False to avoid this check.".format(packaging))
+                    # FIXME: _return_error_or_exception expects a response object. Giving an empty json will cause
+                    # this error: 'dict' object has no attribute 'status'
                     return self._return_error_or_exception(PackagingFormatNotAvailable, {}, "")
         if on_behalf_of:
             headers['On-Behalf-Of'] = on_behalf_of
