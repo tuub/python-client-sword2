@@ -188,7 +188,7 @@ def create_multipart_related(payloads):
     """
     # Generate random boundary code
     # TODO check that it does not occur in the payload data
-    bhash = md5(datetime.now().isoformat()).hexdigest()    # eg 'd8bb3ea6f4e0a4b4682be0cfb4e0a24e'
+    bhash = md5(datetime.now().isoformat().encode('utf-8')).hexdigest()    # eg 'd8bb3ea6f4e0a4b4682be0cfb4e0a24e'
     BOUNDARY = '==========={}_$'.format(bhash)
     CRLF = '\r\n'   # As some servers might barf without this.
     body = []
@@ -213,15 +213,15 @@ def create_multipart_related(payloads):
             body.append('Content-Transfer-Encoding: base64')
             body.append('')
             if hasattr(payload['data'], 'read'):
-                body.append(b64encode(payload['data'].read()))
+                body.append(b64encode(payload['data'].read()).decode("utf-8"))
             else:
-                body.append(b64encode(payload['data']))
+                body.append(b64encode(payload['data'].encode('utf-8')).decode("utf-8"))
         else:
             body.append('')
             if hasattr(payload['data'], 'read'):
-                body.append(b64encode(payload['data'].read()))
+                body.append(b64encode(payload['data'].read()).decode("utf-8"))
             else:
-                body.append(b64encode(payload['data']))
+                body.append(b64encode(payload['data'].encode('utf-8')).decode("utf-8"))
     body.append('--' + BOUNDARY + '--')
     body.append('')
     body_bytes = CRLF.join(body)
