@@ -535,7 +535,7 @@ Loading in a locally held Service Document:
         elif metadata_entry and not (filename and payload):
             # Metadata-only resource creation
             headers['Content-Type'] = entry_content_type # "application/atom+xml;type=entry"
-            data = str(metadata_entry)
+            data = str(metadata_entry).encode("utf-8")
             headers['Content-Length'] = str(len(data))
             
             resp, content = self.h.request(target_iri, method, headers=headers, payload=data)

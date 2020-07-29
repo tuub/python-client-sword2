@@ -224,6 +224,6 @@ def create_multipart_related(payloads):
                 body.append(b64encode(payload['data'].encode('utf-8')).decode("utf-8"))
     body.append('--' + BOUNDARY + '--')
     body.append('')
-    body_bytes = CRLF.join(body)
+    body_bytes = CRLF.join(body).encode("utf-8")
     content_type = 'multipart/related; boundary="{}"'.format(BOUNDARY)
     return content_type, body_bytes
