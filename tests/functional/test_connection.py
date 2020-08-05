@@ -1,4 +1,4 @@
-from . import TestController
+from tests.databank import TestController
 
 from sword2 import Connection
 from sword2.compatible_libs import json

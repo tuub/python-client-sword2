@@ -1,4 +1,4 @@
-from . import TestController
+from tests.databank import TestController
 
 from sword2.deposit_receipt import Deposit_Receipt
 from sword2.utils import NS

@@ -1,4 +1,4 @@
-from . import TestController
+from tests.databank import TestController
 
 from sword2 import Entry
 from sword2.utils import NS

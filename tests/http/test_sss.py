@@ -1,4 +1,4 @@
-from . import TestController
+from tests.databank import TestController
 
 from sword2 import Connection, Entry
 from sword2.exceptions import PackagingFormatNotAvailable

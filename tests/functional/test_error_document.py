@@ -1,4 +1,4 @@
-from . import TestController
+from tests.databank import TestController
 
 from sword2.error_document import Error_Document
 from sword2.utils import NS
